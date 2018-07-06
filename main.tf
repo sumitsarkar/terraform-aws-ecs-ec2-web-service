@@ -9,6 +9,7 @@ provider "aws" {
 resource "aws_ecs_service" "main" {
   lifecycle {
     create_before_destroy = true
+    ignore_changes        = ["desired_count"]
   }
 
   name                               = "${var.environment}${var.service_name}"
@@ -53,6 +54,8 @@ resource "aws_alb_target_group" "main" {
 
 resource "aws_alb_listener_rule" "attach_listener" {
   count = "${length(var.alb_listener_rule_arns)}"
+
+  priority = "${var.rule_priority}"
 
   "action" {
     target_group_arn = "${aws_alb_target_group.main.arn}"

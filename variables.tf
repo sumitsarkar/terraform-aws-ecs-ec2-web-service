@@ -32,11 +32,15 @@ variable "alb_listener_rule_arns" {
 
 variable "rule_type" {
   default     = "path-pattern"
-  description = "The name of the field. Must be one of path-pattern for path based routing or host-header for host based routing."
+  description = "Must be one of path-pattern for path based routing or host-header for host based routing."
 }
 
 variable "rule_value" {
-  description = "The path pattern to match."
+  description = "The path pattern or host header pattern to match."
+}
+
+variable "rule_priority" {
+  description = "Priority of the rule."
 }
 
 # Scaling related variables
@@ -63,10 +67,6 @@ variable "deployment_min_healthy_percent" {
 variable "deployment_max_percent" {
   default     = 200
   description = "The upper limit (as a percentage of the service's desiredCount) of the number of running tasks that can be running in a service during a deployment."
-}
-
-variable "ecs_service_role_arn" {
-  description = "ARN of the IAM role to be used for the AWS ECS Task."
 }
 
 variable "healthy_threshold" {
