@@ -18,6 +18,11 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.deployment_min_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_max_percent}"
 
+  ordered_placement_strategy = {
+    type = "spread"
+    field = "instanceId"
+  }
+
   load_balancer {
     target_group_arn = "${aws_alb_target_group.main.id}"
     container_name   = "${var.container_name}"
