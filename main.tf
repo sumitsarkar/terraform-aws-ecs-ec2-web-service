@@ -8,7 +8,6 @@ provider "aws" {
 
 resource "aws_ecs_service" "main" {
   lifecycle {
-    create_before_destroy = true
     ignore_changes        = ["desired_count"]
   }
 
