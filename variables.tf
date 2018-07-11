@@ -105,3 +105,17 @@ variable "scale_down_cooldown_seconds" {
   default     = 60
   description = "Number of seconds after the alarm that the scale DOWN should happen."
 }
+
+variable "ordered_placement_strategies" {
+  type = "list"
+  default = [{
+    type = "spread"
+  }]
+}
+
+variable "placement_constraints" {
+  type = "list"
+  default = [{
+    type = "distinctInstance"
+  }]
+}
