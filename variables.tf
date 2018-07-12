@@ -109,14 +109,15 @@ variable "scale_down_cooldown_seconds" {
 variable "ordered_placement_strategies" {
   type = "list"
   default = [{
-    type = "spread"
-    field = "instanceId"
+    type = "binpack"
+    field = "memory"
   }]
 }
 
 variable "placement_constraints" {
   type = "list"
   default = [{
-    type = "distinctInstance"
+    type = "memberOf"
+    expression = "attribute:ecs.os-type == linux"
   }]
 }
