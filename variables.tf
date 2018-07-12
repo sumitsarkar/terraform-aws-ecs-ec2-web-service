@@ -110,6 +110,7 @@ variable "ordered_placement_strategies" {
   type = "list"
   default = [{
     type = "spread"
+    field = "instanceId"
   }]
 }
 
