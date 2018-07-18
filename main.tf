@@ -11,7 +11,7 @@ resource "aws_ecs_service" "main" {
     ignore_changes        = ["desired_count"]
   }
 
-  name                               = "${var.environment}${var.service_name}"
+  name                               = "${var.environment}-${var.service_name}"
   cluster                            = "${var.cluster_name}"
   task_definition                    = "${var.task_definition_arn}"
   desired_count                      = "${var.desired_count}"
