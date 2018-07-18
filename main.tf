@@ -91,7 +91,7 @@ resource "aws_appautoscaling_target" "main" {
 }
 
 resource "aws_appautoscaling_policy" "up" {
-  name               = "appScalingPolicy${var.environment}${var.service_name}ScaleUp"
+  name               = "appScalingPolicy${var.environment}${title(var.service_name)}ScaleUp"
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
