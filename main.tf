@@ -18,6 +18,7 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.deployment_min_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_max_percent}"
 
+  health_check_grace_period_seconds = "${var.health_check_grace_period}"
   ordered_placement_strategy = ["${var.ordered_placement_strategies}"]
   placement_constraints = ["${var.placement_constraints}"]
 

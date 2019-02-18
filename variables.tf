@@ -69,6 +69,11 @@ variable "deployment_max_percent" {
   description = "The upper limit (as a percentage of the service's desiredCount) of the number of running tasks that can be running in a service during a deployment."
 }
 
+variable "health_check_grace_period" {
+  default     = 60
+  description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 7200. Only valid for services configured to use load balancers."
+}
+
 variable "healthy_threshold" {
   default     = 3
   description = "Number of times the healthcheck should pass to mark the task as Healthy."
