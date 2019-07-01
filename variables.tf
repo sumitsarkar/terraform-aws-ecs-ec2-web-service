@@ -27,7 +27,7 @@ variable "task_definition_arn" {
 }
 
 variable "alb_listener_rule_arns" {
-  type = "list"
+  type = list(string)
 }
 
 variable "rule_type" {
@@ -112,17 +112,31 @@ variable "scale_down_cooldown_seconds" {
 }
 
 variable "ordered_placement_strategies" {
-  type = "list"
-  default = [{
-    type = "binpack"
-    field = "memory"
-  }]
+  type = list(object(
+    {
+      type = string,
+      field = string
+    }
+  ))
+  default = [
+    {
+      type  = "binpack"
+      field = "memory"
+    },
+  ]
 }
 
 variable "placement_constraints" {
-  type = "list"
-  default = [{
-    type = "memberOf"
-    expression = "attribute:ecs.os-type == linux"
-  }]
+  type = list(object({
+    type       = string
+    expression = string
+  }))
+
+  default = [
+    {
+      type       = "memberOf"
+      expression = "attribute:ecs.os-type == linux"
+    },
+  ]
 }
+

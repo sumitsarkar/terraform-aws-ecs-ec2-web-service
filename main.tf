@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "${var.region}"
+  region = var.region
 }
 
 #
@@ -8,72 +8,84 @@ provider "aws" {
 
 resource "aws_ecs_service" "main" {
   lifecycle {
-    ignore_changes        = ["desired_count"]
+    ignore_changes = [desired_count]
   }
 
   name                               = "${var.environment}-${var.service_name}"
-  cluster                            = "${var.cluster_name}"
-  task_definition                    = "${var.task_definition_arn}"
-  desired_count                      = "${var.desired_count}"
-  deployment_minimum_healthy_percent = "${var.deployment_min_healthy_percent}"
-  deployment_maximum_percent         = "${var.deployment_max_percent}"
+  cluster                            = var.cluster_name
+  task_definition                    = var.task_definition_arn
+  desired_count                      = var.desired_count
+  deployment_minimum_healthy_percent = var.deployment_min_healthy_percent
+  deployment_maximum_percent         = var.deployment_max_percent
 
-  health_check_grace_period_seconds = "${var.health_check_grace_period}"
-  ordered_placement_strategy = ["${var.ordered_placement_strategies}"]
-  placement_constraints = ["${var.placement_constraints}"]
-
-  load_balancer {
-    target_group_arn = "${aws_alb_target_group.main.id}"
-    container_name   = "${var.container_name}"
-    container_port   = "${var.port}"
+  health_check_grace_period_seconds = var.health_check_grace_period
+  dynamic "ordered_placement_strategy" {
+    for_each = var.ordered_placement_strategies
+    content {
+      field = ordered_placement_strategy.value.field
+      type  = ordered_placement_strategy.value.type
+    }
+  }
+  dynamic "placement_constraints" {
+    for_each = var.placement_constraints
+    content {
+      expression = placement_constraints.value.expression
+      type       = placement_constraints.value.type
+    }
   }
 
-  depends_on = ["aws_alb_listener_rule.attach_listener"]
+  load_balancer {
+    target_group_arn = aws_alb_target_group.main.id
+    container_name   = var.container_name
+    container_port   = var.port
+  }
+
+  depends_on = [aws_alb_listener_rule.attach_listener]
 }
 
 resource "aws_alb_target_group" "main" {
   name = "tg${var.environment}${var.service_name}"
 
   health_check {
-    healthy_threshold   = "${var.healthy_threshold}"
-    interval            = "${var.healthcheck_interval}"
-    protocol            = "${var.healthcheck_protocol}"
+    healthy_threshold   = var.healthy_threshold
+    interval            = var.healthcheck_interval
+    protocol            = var.healthcheck_protocol
     matcher             = "200-209"
     timeout             = "5"
-    path                = "${var.health_check_path}"
-    unhealthy_threshold = "${var.unhealthy_threshold}"
+    path                = var.health_check_path
+    unhealthy_threshold = var.unhealthy_threshold
   }
 
-  port     = "${var.port}"
+  port     = var.port
   protocol = "HTTP"
-  vpc_id   = "${var.vpc_id}"
+  vpc_id   = var.vpc_id
 
-  tags {
+  tags = {
     Name        = "tg${var.environment}${var.service_name}"
-    Service     = "${var.service_name}"
-    Environment = "${var.environment}"
+    Service     = var.service_name
+    Environment = var.environment
   }
 }
 
 resource "aws_alb_listener_rule" "attach_listener" {
-  count = "${length(var.alb_listener_rule_arns)}"
+  count = length(var.alb_listener_rule_arns)
 
-  priority = "${var.rule_priority}"
+  priority = var.rule_priority
 
-  "action" {
-    target_group_arn = "${aws_alb_target_group.main.arn}"
+  action {
+    target_group_arn = aws_alb_target_group.main.arn
     type             = "forward"
   }
 
-  "condition" {
-    field = "${var.rule_type}"
+  condition {
+    field = var.rule_type
 
     values = [
-      "${var.rule_value}",
+      var.rule_value,
     ]
   }
 
-  listener_arn = "${element(var.alb_listener_rule_arns, count.index)}"
+  listener_arn = var.alb_listener_rule_arns[count.index]
 }
 
 #
@@ -83,12 +95,10 @@ resource "aws_appautoscaling_target" "main" {
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  min_capacity       = "${var.min_count}"
-  max_capacity       = "${var.max_count}"
+  min_capacity       = var.min_count
+  max_capacity       = var.max_count
 
-  depends_on = [
-    "aws_ecs_service.main",
-  ]
+  depends_on = [aws_ecs_service.main]
 }
 
 resource "aws_appautoscaling_policy" "up" {
@@ -99,7 +109,7 @@ resource "aws_appautoscaling_policy" "up" {
 
   step_scaling_policy_configuration {
     adjustment_type         = "ChangeInCapacity"
-    cooldown                = "${var.scale_up_cooldown_seconds}"
+    cooldown                = var.scale_up_cooldown_seconds
     metric_aggregation_type = "Average"
 
     step_adjustment {
@@ -108,9 +118,7 @@ resource "aws_appautoscaling_policy" "up" {
     }
   }
 
-  depends_on = [
-    "aws_appautoscaling_target.main",
-  ]
+  depends_on = [aws_appautoscaling_target.main]
 }
 
 resource "aws_appautoscaling_policy" "down" {
@@ -121,7 +129,7 @@ resource "aws_appautoscaling_policy" "down" {
 
   step_scaling_policy_configuration {
     adjustment_type         = "ChangeInCapacity"
-    cooldown                = "${var.scale_down_cooldown_seconds}"
+    cooldown                = var.scale_down_cooldown_seconds
     metric_aggregation_type = "Average"
 
     step_adjustment {
@@ -130,7 +138,6 @@ resource "aws_appautoscaling_policy" "down" {
     }
   }
 
-  depends_on = [
-    "aws_appautoscaling_target.main",
-  ]
+  depends_on = [aws_appautoscaling_target.main]
 }
+
