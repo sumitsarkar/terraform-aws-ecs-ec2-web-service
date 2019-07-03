@@ -28,6 +28,7 @@ variable "task_definition_arn" {
 
 variable "alb_listener_rule_arns" {
   type = list(string)
+  default = []
 }
 
 variable "rule_type" {
@@ -140,3 +141,12 @@ variable "placement_constraints" {
   ]
 }
 
+variable "disable_auto_scaling" {
+  description = "Setting this setting to true will result in not creating auto scaling policies for the service"
+  default = false
+}
+
+variable "alb_target_group_id_override" {
+  description = "User has the option to provide a AWS Target Group ID"
+  default = ""
+}

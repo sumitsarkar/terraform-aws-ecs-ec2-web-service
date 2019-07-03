@@ -35,15 +35,14 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.main.id
+    target_group_arn = var.alb_target_group_id_override == "" ? aws_alb_target_group.main.id : var.alb_target_group_id_override
     container_name   = var.container_name
     container_port   = var.port
   }
-
-  depends_on = [aws_alb_listener_rule.attach_listener]
 }
 
 resource "aws_alb_target_group" "main" {
+  count = var.alb_target_group_id_override == "" ? 1 : 0
   name = "tg${var.environment}${var.service_name}"
 
   health_check {
@@ -68,7 +67,7 @@ resource "aws_alb_target_group" "main" {
 }
 
 resource "aws_alb_listener_rule" "attach_listener" {
-  count = length(var.alb_listener_rule_arns)
+  count = var.alb_target_group_id_override == "" ? length(var.alb_listener_rule_arns) : 0
 
   priority = var.rule_priority
 
@@ -91,7 +90,9 @@ resource "aws_alb_listener_rule" "attach_listener" {
 #
 # Application AutoScaling resources
 #
+
 resource "aws_appautoscaling_target" "main" {
+  count = var.disable_auto_scaling ? 1 : 0
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -102,6 +103,7 @@ resource "aws_appautoscaling_target" "main" {
 }
 
 resource "aws_appautoscaling_policy" "up" {
+  count = var.disable_auto_scaling ? 1 : 0
   name               = "appScalingPolicy${var.environment}${title(var.service_name)}ScaleUp"
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
@@ -122,6 +124,7 @@ resource "aws_appautoscaling_policy" "up" {
 }
 
 resource "aws_appautoscaling_policy" "down" {
+  count = var.disable_auto_scaling ? 1 : 0
   name               = "appScalingPolicy${title(var.environment)}${title(var.service_name)}ScaleDown"
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
