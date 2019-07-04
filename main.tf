@@ -35,7 +35,7 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_target_group_id_override == "" ? aws_alb_target_group.main.id : var.alb_target_group_id_override
+    target_group_arn = var.alb_target_group_id_override == "" ? aws_alb_target_group.main[0].id : var.alb_target_group_id_override
     container_name   = var.container_name
     container_port   = var.port
   }
@@ -72,7 +72,7 @@ resource "aws_alb_listener_rule" "attach_listener" {
   priority = var.rule_priority
 
   action {
-    target_group_arn = aws_alb_target_group.main.arn
+    target_group_arn = aws_alb_target_group.main[0].arn
     type             = "forward"
   }
 
