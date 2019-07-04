@@ -92,7 +92,7 @@ resource "aws_alb_listener_rule" "attach_listener" {
 #
 
 resource "aws_appautoscaling_target" "main" {
-  count = var.disable_auto_scaling ? 1 : 0
+  count = var.disable_auto_scaling ? 0 : 1
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -103,7 +103,7 @@ resource "aws_appautoscaling_target" "main" {
 }
 
 resource "aws_appautoscaling_policy" "up" {
-  count = var.disable_auto_scaling ? 1 : 0
+  count = var.disable_auto_scaling ? 0 : 1
   name               = "appScalingPolicy${var.environment}${title(var.service_name)}ScaleUp"
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
