@@ -124,7 +124,7 @@ resource "aws_appautoscaling_policy" "up" {
 }
 
 resource "aws_appautoscaling_policy" "down" {
-  count = var.disable_auto_scaling ? 1 : 0
+  count = var.disable_auto_scaling ? 0 : 1
   name               = "appScalingPolicy${title(var.environment)}${title(var.service_name)}ScaleDown"
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
