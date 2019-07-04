@@ -120,7 +120,7 @@ resource "aws_appautoscaling_policy" "up" {
     }
   }
 
-  depends_on = [aws_appautoscaling_target.main]
+  depends_on = [aws_appautoscaling_target.main[0]]
 }
 
 resource "aws_appautoscaling_policy" "down" {
